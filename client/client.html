@@ -3,14 +3,97 @@
 <head>
   <title>Our simple HTTP server</title>
   <link rel="stylesheet" type="text/css" href="/style.css">
-  
-  <script>
 
+  <script>
+    // Send a request with an Accept header and handle the response.
+    const sendRequest = async (url, acceptType) => {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Accept: acceptType,
+        },
+      });
+
+      // REQUIRED: log raw response text
+      const rawText = await response.text();
+      console.log(rawText);
+
+      const contentType = response.headers.get('content-type') || '';
+
+      // Decide parsing strategy by Content-Type
+      if (contentType.includes('xml')) {
+        handleXML(rawText, response.status);
+      } else {
+        handleJSON(rawText, response.status);
+      }
+    };
+
+    // Render output into the #content section.
+    const render = (status, message, id) => {
+      const content = document.querySelector('#content');
+
+      let html = `<p><strong>Status Code:</strong> ${status}</p>`;
+      html += `<p><strong>Message:</strong> ${message || ''}</p>`;
+      if (id) {
+        html += `<p><strong>ID:</strong> ${id}</p>`;
+      }
+
+      content.innerHTML = html;
+    };
+
+    // Parse JSON response and render it.
+    const handleJSON = (text, status) => {
+      let obj = null;
+
+      try {
+        obj = JSON.parse(text);
+      } catch (e) {
+        // If parsing fails, show raw text so the user still sees something.
+        render(status, text, '');
+        return;
+      }
+
+      render(status, obj.message || '', obj.id || '');
+    };
+
+    // Parse XML response and render it.
+    const handleXML = (text, status) => {
+      const parser = new DOMParser();
+      const xml = parser.parseFromString(text, 'application/xml');
+
+      const messageNode = xml.querySelector('message');
+      const idNode = xml.querySelector('id');
+
+      const message = messageNode ? messageNode.textContent : '';
+      const id = idNode ? idNode.textContent : '';
+
+      render(status, message, id);
+    };
+
+    // Wire up the UI once the page loads.
+    const init = () => {
+      const pageSelect = document.querySelector('#page');
+      const typeSelect = document.querySelector('#type');
+      const sendButton = document.querySelector('#send');
+
+      sendButton.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        const url = pageSelect.value;
+        const acceptType = typeSelect.value;
+
+        sendRequest(url, acceptType);
+      });
+    };
+
+    window.onload = init;
   </script>
 </head>
+
 <body>
   <section id="top">
     <h3>Status Code Tests</h3>
+
     <select id="page">
       <option value="/success">Success</option>
       <option value="/badRequest">Bad Request</option>
@@ -20,13 +103,15 @@
       <option value="/notImplemented">Not Implemented</option>
       <option value="/notFound">Not Found</option>
     </select>
+
     <select id="type">
       <option value="application/json">JSON</option>
       <option value="text/xml">XML</option>
     </select>
+
     <button id="send">Send</button>
   </section>
-  <section id="content">
-  </section>
+
+  <section id="content"></section>
 </body>
 </html>

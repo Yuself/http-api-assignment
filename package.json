@@ -1,0 +1,16 @@
+{
+  "name": "http-api-assignment",
+  "version": "1.0.0",
+  "description": "IGME 430 HTTP API Assignment",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "test": "npm run lint",
+    "lint": "eslint ."
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "^9.0.0"
+  }
+}
