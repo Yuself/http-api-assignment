@@ -5,7 +5,6 @@
   <link rel="stylesheet" type="text/css" href="/style.css">
 
   <script>
-    // Send a request with an Accept header and handle the response.
     const sendRequest = async (url, acceptType) => {
       const response = await fetch(url, {
         method: 'GET',
@@ -14,13 +13,11 @@
         },
       });
 
-      // REQUIRED: log raw response text
       const rawText = await response.text();
       console.log(rawText);
 
       const contentType = response.headers.get('content-type') || '';
 
-      // Decide parsing strategy by Content-Type
       if (contentType.includes('xml')) {
         handleXML(rawText, response.status);
       } else {
@@ -28,7 +25,6 @@
       }
     };
 
-    // Render output into the #content section.
     const render = (status, message, id) => {
       const content = document.querySelector('#content');
 
@@ -41,7 +37,6 @@
       content.innerHTML = html;
     };
 
-    // Parse JSON response and render it.
     const handleJSON = (text, status) => {
       let obj = null;
 
@@ -56,7 +51,6 @@
       render(status, obj.message || '', obj.id || '');
     };
 
-    // Parse XML response and render it.
     const handleXML = (text, status) => {
       const parser = new DOMParser();
       const xml = parser.parseFromString(text, 'application/xml');
@@ -70,7 +64,6 @@
       render(status, message, id);
     };
 
-    // Wire up the UI once the page loads.
     const init = () => {
       const pageSelect = document.querySelector('#page');
       const typeSelect = document.querySelector('#type');

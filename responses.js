@@ -1,14 +1,9 @@
-// apiResponses.js
-
-// Decide response format based on Accept header.
-// Default: JSON (if no Accept header is present).
 const wantsXML = (request) => {
   const accept = request.headers.accept;
   if (!accept) return false;
   return accept.includes('application/xml') || accept.includes('text/xml');
 };
 
-// Helper: send JSON response
 const respondJSON = (request, response, status, object) => {
   const content = JSON.stringify(object);
   response.writeHead(status, {
@@ -16,7 +11,6 @@ const respondJSON = (request, response, status, object) => {
     'Content-Length': Buffer.byteLength(content, 'utf8'),
   });
 
-  // HEAD should not include a response body
   if (request.method !== 'HEAD') {
     response.write(content);
   }
@@ -24,9 +18,7 @@ const respondJSON = (request, response, status, object) => {
   response.end();
 };
 
-// Helper: send XML response
 const respondXML = (request, response, status, object) => {
-  // object shape: { message: "...", id?: "badRequest" }
   let xml = '<response>';
   xml += `<message>${object.message}</message>`;
   if (object.id) xml += `<id>${object.id}</id>`;
@@ -44,7 +36,6 @@ const respondXML = (request, response, status, object) => {
   response.end();
 };
 
-// One entry point: choose JSON or XML
 const respond = (request, response, status, object) => {
   if (wantsXML(request)) return respondXML(request, response, status, object);
   return respondJSON(request, response, status, object);
@@ -52,7 +43,6 @@ const respond = (request, response, status, object) => {
 
 // ---- Required API endpoints (GET) ----
 
-// /success -> 200
 const getSuccess = (request, response) => {
   respond(request, response, 200, { message: 'This request has succeeded.' });
 };
